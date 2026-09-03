@@ -1,0 +1,63 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/site/**'
+      - 'docs/demo_document.png'
+      - 'docs/screenshots/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble site with shared docs assets
+        run: |
+          set -euo pipefail
+          mkdir -p _site/assets/screenshots
+          cp -r docs/site/* _site/
+          cp docs/demo_document.png _site/assets/
+          cp docs/screenshots/*.png _site/assets/screenshots/
+
+      - name: Verify required assets
+        run: |
+          set -euo pipefail
+          test -f _site/index.html
+          test -f _site/styles.css
+          test -f _site/assets/demo_document.png
+          for f in 01_welcome 02_loaded_default 03_global_threshold 04_lasso_preview 05_applied 06_bw_mode 07_export_result; do
+            test -f "_site/assets/screenshots/${f}.png"
+          done
+          echo "All 8 verified screenshots present."
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
