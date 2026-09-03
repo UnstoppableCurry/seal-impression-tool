@@ -6,6 +6,8 @@
 
 > A simple cross-platform desktop tool that extracts seal impressions / stamps / dark handwriting from scanned documents via grayscale range thresholding, with lasso-based local refinement, and exports red-on-white images at 300/600 dpi (A4).
 
+📖 **[可视化使用图解（GitHub Pages）](https://unstoppablecurry.github.io/seal-impression-tool/)** — 静态界面截图与操作流程说明（非在线运行版）。
+
 ---
 
 ## 📥 下载安装

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>印模提取工具 — 桌面版使用图解</title>
+  <meta name="description" content="跨平台 Python 桌面小工具：从扫描件/照片中分离印章、手写签字与深色字迹，通过灰度亮度过滤与套索局部精修，导出红白图（300/600 dpi A4）。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://unstoppablecurry.github.io/seal-impression-tool/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="印模提取工具 — 桌面版使用图解">
+  <meta property="og:description" content="从扫描件分离印章与深色字迹，灰度亮度过滤 + 套索精修，导出红白图。本页为静态图解，非在线运行版。">
+  <meta property="og:url" content="https://unstoppablecurry.github.io/seal-impression-tool/">
+  <meta property="og:image" content="https://unstoppablecurry.github.io/seal-impression-tool/assets/screenshots/07_export_result.png">
+  <meta property="og:locale" content="zh_CN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="印模提取工具 — 桌面版使用图解">
+  <meta name="twitter:description" content="跨平台桌面工具：灰度亮度过滤提取印模，套索局部精修，导出红白图。">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="#top" aria-label="印模提取工具，返回页首">
+        <span class="brand-mark" aria-hidden="true">印</span>
+        <span>印模提取工具</span>
+      </a>
+      <nav aria-label="页面导航">
+        <ul class="nav-links">
+          <li><a href="#problem">问题</a></li>
+          <li><a href="#principle">原理</a></li>
+          <li><a href="#workflow">流程</a></li>
+          <li><a href="#limitations">说明</a></li>
+          <li><a href="https://github.com/UnstoppableCurry/seal-impression-tool">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">桌面应用 · 非浏览器运行</span>
+          <h1>从扫描件中提取印章与深色字迹</h1>
+          <p class="lead">
+            一个跨平台 Python 桌面小工具：把扫描件或照片上的<strong>印章、手写签字、深色字迹</strong>从背景纸上分离出来，导出为「红白图」（红色 = 保留区域，白色 = 背景），可自选 300 / 600 dpi A4 输出。
+          </p>
+          <p class="hero-note" role="note">
+            本页面为<strong>静态图解说明</strong>，展示真实界面截图与操作流程；软件需在本地安装或从源码运行，<strong>无法在浏览器中直接使用</strong>。
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="https://github.com/UnstoppableCurry/seal-impression-tool/releases">下载安装包</a>
+            <a class="btn btn-secondary" href="https://github.com/UnstoppableCurry/seal-impression-tool#-从源码运行">从源码运行</a>
+          </div>
+        </div>
+
+        <div class="comparison-card" aria-label="效果对比：原始扫描件与导出红白图">
+          <div class="comparison-grid">
+            <figure class="comparison-item">
+              <figcaption>原始扫描件</figcaption>
+              <img src="assets/demo_document.png" alt="演示文档扫描件，含红色印章与文字内容" width="800" height="1131" loading="eager">
+            </figure>
+            <figure class="comparison-item">
+              <figcaption>导出红白图</figcaption>
+              <img src="assets/screenshots/07_export_result.png" alt="提取后的红白图：红色区域为保留的印模，白色为背景" width="800" height="1131" loading="eager">
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="problem">
+      <div class="container">
+        <header class="section-header">
+          <h2>要解决什么问题？</h2>
+          <p>纸质文件扫描后，印章、签字与纸张背景混在一起，难以单独取出用于排版或打印回纸质文件。</p>
+        </header>
+        <div class="problem-grid">
+          <article class="card">
+            <h3>输入</h3>
+            <p>扫描件或照片上的印章、手写签字、深色字迹，常见格式为 jpg / png / bmp / tiff。</p>
+          </article>
+          <article class="card">
+            <h3>处理</h3>
+            <p>通过灰度亮度范围过滤分离前景与背景；支持全图过滤与套索圈选局部精修，全程实时预览。</p>
+          </article>
+          <article class="card">
+            <h3>输出</h3>
+            <p>红白图（红 = 保留，白 = 背景），可选 300 dpi（2480×3508）或 600 dpi（4960×7016）A4 画布，图像自动居中。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="principle">
+      <div class="container">
+        <header class="section-header">
+          <h2>工作原理</h2>
+          <p>基于亮度阈值，而非在线 AI 服务。</p>
+        </header>
+        <div class="principle-box">
+          <p>核心流程：<code>彩色 → 灰度 → 亮度范围过滤</code>。灰度值落在设定区间内的像素被保留；纸张背景通常较亮（接近 255），印泥偏暗——把最大值拉低即可滤掉背景。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <div class="container">
+        <header class="section-header">
+          <h2>操作流程图解</h2>
+          <p>以下截图为仓库 <code>docs/</code> 目录中已验证的界面截图，按实际使用顺序排列。</p>
+        </header>
+
+        <ol class="workflow-list">
+          <li class="workflow-step">
+            <div class="step-content">
+              <span class="step-badge" aria-hidden="true">1</span>
+              <h3>打开图像</h3>
+              <p>启动桌面应用后，点击左上角「打开图像 (Ctrl+O)」，支持 jpg / png / bmp / tiff。</p>
+            </div>
+            <figure class="step-media">
+              <img src="assets/screenshots/01_welcome.png" alt="应用初始欢迎界面，左侧为控制面板，中央为空白画布" width="1200" height="800" loading="lazy">
+              <figcaption>01 — 初始界面</figcaption>
+            </figure>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-content">
+              <span class="step-badge" aria-hidden="true">2</span>
+              <h3>加载文档</h3>
+              <p>打开图像后，程序将彩色图转为灰度，并在画布中显示。可使用滚轮、快捷键或按钮缩放与平移视图。</p>
+            </div>
+            <figure class="step-media">
+              <img src="assets/screenshots/02_loaded_default.png" alt="已加载演示文档，显示完整扫描页面" width="1200" height="800" loading="lazy">
+              <figcaption>02 — 图像已加载</figcaption>
+            </figure>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-content">
+              <span class="step-badge" aria-hidden="true">3</span>
+              <h3>全局亮度过滤</h3>
+              <p>拖动「🌐 全局亮度过滤」的最小值 / 最大值滑杆：</p>
+              <ul>
+                <li>灰度值落在区间内会被保留（彩色覆盖模式下显示原图内容，其余变黑）</li>
+                <li>底部状态栏实时显示保留区域占比</li>
+              </ul>
+              <p class="callout" role="note">全局过滤<strong>只在首次有效</strong>：一旦使用套索，全局参数即锁定；重新加载图像可解锁。</p>
+            </div>
+            <figure class="step-media">
+              <img src="assets/screenshots/03_global_threshold.png" alt="调整全局亮度过滤滑杆后的预览效果" width="1200" height="800" loading="lazy">
+              <figcaption>03 — 全局亮度过滤</figcaption>
+            </figure>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-content">
+              <span class="step-badge" aria-hidden="true">4</span>
+              <h3>套索圈选，局部精修</h3>
+              <p>全局过滤后若某些区域仍不干净（例如印章盖在文字上）：</p>
+              <ul>
+                <li>点击「开始套索选择 (L)」，按住鼠标左键圈出要精修的区域</li>
+                <li>区域出现绿色描边，进入预览状态</li>
+                <li>拖动「📍 选中区域亮度过滤」滑杆，仅圈内应用新参数</li>
+              </ul>
+            </div>
+            <figure class="step-media">
+              <img src="assets/screenshots/04_lasso_preview.png" alt="套索圈选印章区域并预览局部亮度过滤" width="1200" height="800" loading="lazy">
+              <figcaption>04 — 套索预览</figcaption>
+            </figure>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-content">
+              <span class="step-badge" aria-hidden="true">5</span>
+              <h3>应用局部阈值</h3>
+              <p>确认预览效果后，按 <kbd>Enter</kbd> 将局部参数应用到选中区域。按 <kbd>Esc</kbd> 取消，按 <kbd>Delete</kbd> 清除重选。</p>
+            </div>
+            <figure class="step-media">
+              <img src="assets/screenshots/05_applied.png" alt="局部阈值已应用到套索选中区域后的效果" width="1200" height="800" loading="lazy">
+              <figcaption>05 — 局部阈值已应用</figcaption>
+            </figure>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-content">
+              <span class="step-badge" aria-hidden="true">6</span>
+              <h3>检查黑白效果</h3>
+              <p>将显示模式切换到「纯黑白图」，确认最终保留区域（白色 = 保留）。</p>
+            </div>
+            <figure class="step-media">
+              <img src="assets/screenshots/06_bw_mode.png" alt="纯黑白显示模式下的二值化预览" width="1200" height="800" loading="lazy">
+              <figcaption>06 — 纯黑白图模式</figcaption>
+            </figure>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-content">
+              <span class="step-badge" aria-hidden="true">7</span>
+              <h3>导出红白图</h3>
+              <p>点击「导出红白图 (Ctrl+S)」：</p>
+              <ul>
+                <li>红色 = 保留区域，白色 = 背景</li>
+                <li>可选 300 dpi 或 600 dpi 的 A4 画布，图像自动居中</li>
+                <li>导出后可用 Word 或打印排版</li>
+              </ul>
+            </div>
+            <figure class="step-media">
+              <img src="assets/screenshots/07_export_result.png" alt="最终导出的红白图效果" width="800" height="1131" loading="lazy">
+              <figcaption>07 — 导出红白图</figcaption>
+            </figure>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="shortcuts">
+      <div class="container">
+        <header class="section-header">
+          <h2>常用快捷键</h2>
+        </header>
+        <div class="table-wrap" role="region" aria-label="快捷键一览表" tabindex="0">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">快捷键</th>
+                <th scope="col">功能</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><kbd>Ctrl+O</kbd></td><td>打开图像文件</td></tr>
+              <tr><td><kbd>Ctrl+S</kbd></td><td>导出二值图</td></tr>
+              <tr><td><kbd>L</kbd></td><td>激活套索选择工具</td></tr>
+              <tr><td><kbd>Delete</kbd></td><td>清除当前选择</td></tr>
+              <tr><td><kbd>Enter</kbd></td><td>应用局部阈值到选中区域</td></tr>
+              <tr><td><kbd>Escape</kbd></td><td>取消套索选择</td></tr>
+              <tr><td><kbd>+</kbd> / <kbd>=</kbd></td><td>放大图像</td></tr>
+              <tr><td><kbd>-</kbd></td><td>缩小图像</td></tr>
+              <tr><td><kbd>Ctrl+0</kbd></td><td>适合窗口大小</td></tr>
+              <tr><td><kbd>Space</kbd> + 拖拽</td><td>平移图像</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="limitations">
+      <div class="container">
+        <header class="section-header">
+          <h2>使用说明与限制</h2>
+          <p>以下内容均来自 README 与源码，未作额外承诺。</p>
+        </header>
+        <ul class="limitations-list">
+          <li><strong>桌面应用，非浏览器工具：</strong>需在 Windows 或 macOS 本地运行，或自行从源码启动；本网站仅为静态说明页。</li>
+          <li><strong>基于亮度阈值：</strong>处理方式为灰度亮度范围过滤，效果取决于原图对比度与拍摄/扫描质量。</li>
+          <li><strong>全局过滤锁定：</strong>首次使用套索后，全局亮度参数会被锁定；需重新加载图像才能再次调整全局设置。</li>
+          <li><strong>支持格式：</strong>打开 jpg / jpeg / png / bmp / tiff / tif；导出为 png 或 jpg。</li>
+          <li><strong>macOS 未签名：</strong>首次打开可能提示「无法验证开发者」，可按 README 说明移除隔离属性或右键打开。</li>
+          <li><strong>项目背景：</strong>代码由既有 Windows 可执行文件反编译还原并经人工修复；另修复了 macOS 文件选择对话框的兼容性问题。以 MIT 协议开源。</li>
+          <li><strong>依赖：</strong>opencv-python、numpy、pillow；界面使用 Python 自带的 tkinter。</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 <a href="https://github.com/UnstoppableCurry">UnstoppableCurry</a> · <a href="https://github.com/UnstoppableCurry/seal-impression-tool/blob/main/LICENSE">MIT</a></p>
+      <p>
+        <a href="https://github.com/UnstoppableCurry/seal-impression-tool">仓库</a> ·
+        <a href="https://github.com/UnstoppableCurry/seal-impression-tool/releases">Releases</a> ·
+        <a href="https://github.com/UnstoppableCurry/seal-impression-tool/blob/main/README.md">README</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
